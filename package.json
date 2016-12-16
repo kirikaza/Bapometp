@@ -9,7 +9,10 @@
 	"dependencies": {
 		"react": "15.4.1",
 		"react-native": "0.39.2",
-	  	"react-native-bluetooth-serial": "0.1.6"
+	  	"react-native-bluetooth-serial": "0.1.6",
+		"@remobile/react-native-toast": "^1.0.4",
+		"iconv-lite": "^0.4.13",
+		"stream": "0.0.2"
 	},
 	"devDependenciexs": {
 		"babel-jest": "18.0.0",
