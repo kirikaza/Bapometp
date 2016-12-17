@@ -16,6 +16,8 @@ import { Buffer } from 'buffer'
 global.Buffer = Buffer
 const iconv = require('iconv-lite')
 
+const DEVICE_ADDR = '20:14:04:15:36:25';
+
 const Button = ({ label, onPress }) =>
 	<TouchableOpacity style={styles.button} onPress={onPress}>
 		<Text style={{ color: '#fff' }}>{label}</Text>
@@ -23,110 +25,89 @@ const Button = ({ label, onPress }) =>
 
 class BluetoothSerialExample extends Component {
 	constructor (props) {
-		super(props)
+		super(props);
 		this.state = {
-			discovering: false,
-			devices: [],
+			btEnabled: false,
 			connected: false,
-			data: ''
+			connecting: false,
+			temperature: null,
+			debug: ''
 		}
 	}
 
 	componentWillMount () {
 		Promise.all([
-			BluetoothSerial.isEnabled(),
-			BluetoothSerial.list()
+			BluetoothSerial.isEnabled()
 		])
 			.then((values) => {
-				const [ isEnabled, devices ] = values
-				this.setState({ isEnabled, devices })
-			})
+				const [ enabled ] = values;
+				this.setState({ btEnabled: enabled });
+			});
 
-		BluetoothSerial.on('bluetoothEnabled', () => Console.log('Bluetooth enabled'))
-		BluetoothSerial.on('bluetoothDisabled', () => Console.log('Bluetooth disabled'))
+		BluetoothSerial.on('bluetoothEnabled', () => {
+			this.setState({ btEnabled: true });
+		});
+		BluetoothSerial.on('bluetoothDisabled', () => {
+			this.setState({ btEnabled: false });
+		});
 		BluetoothSerial.on('connectionLost', () => {
-			Console.log(`Connection to device has been lost`)
-			this.setState({ connected: false })
-		})
-		BluetoothSerial.on('data', (data) => {
-			this.setState({ connected: false, data: data })
-		})
+			this.setState({ connecting: false, connected: false });
+		});
 	}
 
 	connect () {
-		this.setState({ connecting: true })
-		BluetoothSerial.connect('20:14:04:15:36:25')
-			.then((res) => {
-				Console.log(`Connected to device`)
-				this.setState({ connected: true, connecting: false })
-			})
-			.catch((err) => Console.log(err))
-
-		if (this.state.connected) {
-			BluetoothSerial.subscribe('\n')
+		if (this.state.btEnabled && !this.state.connected && !this.state.connecting) {
+			this.setState({ connecting: true });
+			BluetoothSerial.connect(DEVICE_ADDR)
 				.then((res) => {
-					this.setState({ data: res })
+					this.setState({ connected: true, connecting: false });
 				})
-				.catch((err) => Console.log(err))
+				.catch((err) => {
+					this.setState({ connecting: false, debug: this.state.debug + '\nconnect caught err: ' + err });
+				});
 		}
 	}
 
 	write (message) {
-		if (!this.state.connected) {
+		if (this.state.connected) {
+			BluetoothSerial.write('t')
+				.then((res) => {
+					this.setState({ temperature: null });
+					BluetoothSerial.readUntil('\n')
+						.then((read) => {
+							this.setState({ temperature: read });
+						})
+						.catch((err) => {
+							this.setState({ debug: this.state.debug + "\nsubscribe caught err: " + err });
+						})
+				})
+				.catch((err) => {
+					this.setState({ debug: this.state.debug + '\nwrite caught err: ' + err });
+				})
 		}
-
-		BluetoothSerial.write(message)
-			.then((res) => {
-				this.setState({ connected: true })
-			})
-			.catch((err) => Console.log(err))
-	}
-
-	writePackets (message, packetSize = 64) {
-		const toWrite = iconv.encode(message, 'cp852')
-		const writePromises = []
-		const packetCount = Math.ceil(toWrite.length / packetSize)
-
-		for (var i = 0; i < packetCount; i++) {
-			const packet = new Buffer(packetSize)
-			packet.fill(' ')
-			toWrite.copy(packet, 0, i * packetSize, (i + 1) * packetSize)
-			writePromises.push(BluetoothSerial.write(packet))
-		}
-
-		Promise.all(writePromises)
-			.then((result) => {
-			})
 	}
 
 	render () {
 		return (
 			<View style={styles.container}>
-				<Text style={styles.heading}>Bluetooth Serial Example</Text>
+				<Text style={styles.heading}>BAPOMETP</Text>
 
-				<View style={{ backgroundColor: '#eee' }}>
-					<Text>t = {this.state.data}</Text>
+				<View style={{ backgroundColor: '#369' }}>
+					<Text>debug{this.state.debug}</Text>
 				</View>
 
-				<View style={styles.connectionInfoWrapper}>
-					<View>
-						{this.state.connected
-							? (
-								<Text style={styles.connectionInfo}>
-									✓ Connected
-								</Text>
-							) : (
-								<Text style={[styles.connectionInfo, { color: '#ff6523' }]}>
-									✗ Not connected to any device
-								</Text>
-							)}
-					</View>
+				<View style={{ backgroundColor: '#9C9' }}>
+					<Text>{this.state.btEnabled ? (this.state.connected ? 'connected' : (this.state.connecting ? 'connecting' : 'not connected')) : 'BT disabled'}</Text>
+				</View>
+
+				<View style={{ backgroundColor: '#FC9' }}>
+					<Text>t = {this.state.temperature}ºC</Text>
 				</View>
 
 				<View style={{ flexDirection: 'row', justifyContent: 'center' }}>
 					<Button
 						label='Write to device'
-						onPress={this.write.bind(this, 'test')}
+						onPress={this.write.bind(this)}
 					/>
 					<Button
 						label='Connect'
