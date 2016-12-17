@@ -34,7 +34,7 @@ class Bapometp extends Component {
 
 	render () {
 		return (
-			<View style={styles.container}>
+			<View style={[styles.container, this.getBackgroundColor()]} >
 				<Text style={styles.heading}>BAPOMETP</Text>
 
 				<View style={{ backgroundColor: '#369' }}>
@@ -54,6 +54,30 @@ class Bapometp extends Component {
 				</View>
 			</View>
 		)
+	}
+
+	getBackgroundColor() {
+		const minTemp = 10;
+		const maxTemp = 95;
+		const minColor = [168, 187, 255];
+		const maxColor = [255, 75, 75];
+		let temperature = this.state.temperature;
+
+		if (temperature === null || temperature <= minTemp) return this.getRgbColor(minColor);
+		if (temperature >= maxTemp) return this.getRgbColor(maxColor);
+
+		let rate = (temperature - minTemp) / maxTemp;
+		let result = [0, 0, 0];
+		result[0] = Math.round(Math.abs(maxColor[0] - minColor[0]) * rate) + Math.min(minColor[0], maxColor[0]);
+		result[1] = Math.round(Math.abs(maxColor[1] - minColor[1]) * rate) + Math.min(minColor[1], maxColor[1]);
+		result[2] = Math.round(Math.abs(maxColor[2] - minColor[2]) * rate) + Math.min(minColor[2], maxColor[2]);
+		return this.getRgbColor(result);
+	}
+
+	getRgbColor(color) {
+		return {
+			backgroundColor: "rgb(" + color[0] + ", " + color[1] + ", " + color[2] + ")"
+		}
 	}
 
 	checkBtEnabled() {
