@@ -10,7 +10,8 @@ import BluetoothSerial from 'react-native-bluetooth-serial'
 
 const DEVICE_ADDR = '20:14:04:15:36:25';
 const ASK_TEMPERATURE_REQUEST = 't';
-const REREAD_ANSWER_DELAY = 100;
+const MEASURE_PERIOD = 1000;
+const REREAD_ANSWER_PERIOD = 100;
 
 class Bapometp extends Component {
 	constructor (props) {
@@ -79,7 +80,7 @@ class Bapometp extends Component {
 	}
 
 	setBtEnabled(enabled) {
-		this.setState({ btEnabled: enabled, connecting: false, connected: false });
+		this.setState({ btEnabled: enabled, connecting: false, connected: false, asking: false });
 		if (enabled) {
 			this.connect();
 		}
@@ -96,10 +97,24 @@ class Bapometp extends Component {
 		BluetoothSerial.connect(DEVICE_ADDR)
 			.then(() => {
 				this.setState({ connected: true, connecting: false, asking: false });
+				this.startMeasuring();
 			})
 			.catch((err) => {
 				this.setState({ connecting: false, debug: this.state.debug + '\nconnect caught err: ' + err });
 			});
+	}
+
+	startMeasuring() {
+		if (!this.state.connected) {
+			return;
+		}
+		let taskId = setInterval(() => {
+			if (!this.state.connected) {
+				clearInterval(taskId);
+				return;
+			}
+			this.askTemperature();
+		}, MEASURE_PERIOD);
 	}
 
 	askTemperature() {
@@ -114,7 +129,7 @@ class Bapometp extends Component {
 			.then(() => {
 				BluetoothSerial.write(ASK_TEMPERATURE_REQUEST)
 					.then(() => {
-						this.readTemperatureAnswer();
+						this.startReadingTemperatureAnswer();
 					})
 					.catch((err) => {
 						this.setState({ asking: false, debug: this.state.debug + '\nwrite caught err: ' + err });
@@ -125,8 +140,12 @@ class Bapometp extends Component {
 			});
 	}
 
-	readTemperatureAnswer() {
+	startReadingTemperatureAnswer() {
 		let taskId = setInterval(() => {
+			if (!this.state.asking) {
+				clearInterval(taskId);
+				return;
+			}
 			BluetoothSerial.readUntil('\n')
 				.then((read) => {
 					if (!read.length) {
@@ -139,7 +158,7 @@ class Bapometp extends Component {
 					clearInterval(taskId);
 					this.setState({ asking: false, debug: this.state.debug + "\nreadUntil caught err: " + err });
 				})
-		}, REREAD_ANSWER_DELAY);
+		}, REREAD_ANSWER_PERIOD);
 	}
 
 }
