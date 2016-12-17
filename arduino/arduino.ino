@@ -88,9 +88,14 @@ void loop()
 
   if (BTserial.available()) {  
         char cmd = BTserial.read();
+        unsigned long time = millis();
         if (cmd == 't') {
           Serial.print("got command 't' for temperature, answering ");
+          Serial.print(time);
+          Serial.write(' ');
           Serial.println(celsius);
+          BTserial.print(time);
+          BTserial.write(' ');
           BTserial.println(celsius);
         } else {
           Serial.print("got unknown command ");

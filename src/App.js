@@ -20,6 +20,7 @@ class Bapometp extends Component {
 			btEnabled: false,
 			connected: false,
 			connecting: false,
+			measures: [],
 			temperature: null,
 			asking: false,
 			debug: ''
@@ -49,9 +50,7 @@ class Bapometp extends Component {
 				</View>
 
 				<View>
-					<TouchableOpacity onPress={() => this.askTemperature()}>
-						<Text>Is it hot?</Text>
-					</TouchableOpacity>
+					{this.state.measures.map((m) => <Text key={m.time}> {m.time} | {m.temperature} </Text>)}
 				</View>
 			</View>
 		)
@@ -108,6 +107,7 @@ class Bapometp extends Component {
 		if (!this.state.connected) {
 			return;
 		}
+		this.setState({ measures: [] });
 		let taskId = setInterval(() => {
 			if (!this.state.connected) {
 				clearInterval(taskId);
@@ -152,7 +152,11 @@ class Bapometp extends Component {
 						return;
 					}
 					clearInterval(taskId);
-					this.setState({ asking: false, temperature: parseFloat(read)});
+					let time = parseInt(read);
+					let temperature = parseFloat(read.substring(read.indexOf(' ')));
+					let newMeasure = { time: time, temperature: temperature };
+					let measures = this.state.measures.concat([newMeasure]);
+					this.setState({ asking: false, measures: measures, temperature: temperature });
 				})
 				.catch((err) => {
 					clearInterval(taskId);
