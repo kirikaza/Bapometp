@@ -12,7 +12,7 @@ import BluetoothSerial from 'react-native-bluetooth-serial'
 
 const DEVICE_ADDR = '20:14:04:15:36:25';
 const ASK_TEMPERATURE_REQUEST = 't';
-const MEASURE_PERIOD = 1000;
+const MEASURE_PERIOD = 5000;
 const REREAD_ANSWER_PERIOD = 100;
 
 class Bapometp extends Component {
@@ -24,11 +24,18 @@ class Bapometp extends Component {
 			btEnabled: false,
 			connected: false,
 			connecting: false,
-			measures: [],
+			measures: [
+				// {time: 5513, temperature: 42.5},
+				// {time: 6813, temperature: 47.06},
+				// {time: 8112, temperature: 50.81}
+			],
 			temperature: null,
+			forecast: null,
 			asking: false,
 			debug: ''
-		}
+		};
+		this.extrapolate = require('everpolate').linear;
+		// this.state.forecast = this.forecast100(this.state.measures, 8112);
 	}
 
 	componentWillMount () {
@@ -115,11 +122,13 @@ class Bapometp extends Component {
 					<Text style={styles.timer}>Boil in: ???s</Text>
 				</View>
 
-				<View>
-					{this.state.measures.map((m) => <Text key={m.time}> {m.time} | {m.temperature} </Text>)}
+				<View style={{ backgroundColor: '#FED' }}>
+					<Text>{this.state.forecast === null ? 'no forecast' : this.state.forecast} sec</Text>
 				</View>
 
-
+				{/*<View>
+					{this.state.measures.map((m) => <Text key={m.time}> {m.time} | {m.temperature} </Text>)}
+				</View>*/}
 			</View>
 		)
 	}
@@ -248,13 +257,33 @@ class Bapometp extends Component {
 					let temperature = parseFloat(read.substring(read.indexOf(' ')));
 					let newMeasure = { time: time, temperature: temperature };
 					let measures = this.state.measures.concat([newMeasure]);
-					this.setState({ asking: false, measures: measures, temperature: temperature });
+					let forecast = this.forecast100(measures, time);
+					this.setState({ asking: false, measures: measures, temperature: temperature, forecast: forecast });
 				})
 				.catch((err) => {
 					clearInterval(taskId);
 					this.setState({ asking: false, debug: this.state.debug + "\nreadUntil caught err: " + err });
 				})
 		}, REREAD_ANSWER_PERIOD);
+	}
+
+	forecast100(measures, now) {
+		if (measures.length < 3) {
+			return null;
+		}
+		let interval = MEASURE_PERIOD;
+		let timesCount = 30 * 60 * 1000 / interval;
+		let times = Array.from({length: timesCount}, (v, k) => k + 1).map((i) => i * interval + now);
+		let temperatures = this.extrapolate(
+			times,
+			measures.map((m) => m.time),
+			measures.map((m) => m.temperature)
+		);
+		let boilIndex = temperatures.findIndex((t) => t >= 100);
+		if (boilIndex == -1) {
+			return null;
+		}
+		return (times[boilIndex] - now) / 1000;
 	}
 
 }

@@ -1,26 +1,28 @@
 {
-	"name": "Bapometp",
-	"version": "0.0.1",
-	"private": true,
-	"scripts": {
-		"start": "node node_modules/react-native/local-cli/cli.js start",
-		"test": "jest"
-	},
-	"dependencies": {
-		"react": "15.4.1",
-		"react-native": "0.39.2",
-	  	"react-native-bluetooth-serial": "0.1.6",
-		"@remobile/react-native-toast": "^1.0.4",
-		"iconv-lite": "^0.4.13",
-		"stream": "0.0.2"
-	},
-	"devDependenciexs": {
-		"babel-jest": "18.0.0",
-		"babel-preset-react-native": "1.9.1",
-		"jest": "18.0.0",
-		"react-test-renderer": "15.4.1"
-	},
-	"jest": {
-		"preset": "react-native"
-	}
+  "name": "Bapometp",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node node_modules/react-native/local-cli/cli.js start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@remobile/react-native-toast": "^1.0.4",
+    "everpolate": "0.0.3",
+    "extrapolate": "^1.0.2",
+    "iconv-lite": "^0.4.13",
+    "react": "15.4.1",
+    "react-native": "0.39.2",
+    "react-native-bluetooth-serial": "0.1.6",
+    "stream": "0.0.2"
+  },
+  "devDependenciexs": {
+    "babel-jest": "18.0.0",
+    "babel-preset-react-native": "1.9.1",
+    "jest": "18.0.0",
+    "react-test-renderer": "15.4.1"
+  },
+  "jest": {
+    "preset": "react-native"
+  }
 }
