@@ -14,6 +14,7 @@ const DEVICE_ADDR = '20:14:04:15:36:25';
 const ASK_TEMPERATURE_REQUEST = 't';
 const MEASURE_PERIOD = 5000;
 const REREAD_ANSWER_PERIOD = 100;
+const BOIL_TEMPERATURE = 97;
 
 class Bapometp extends Component {
 	constructor (props) {
@@ -194,7 +195,7 @@ class Bapometp extends Component {
 				</View>
 
 				<View style={styles.timerContainer}>
-					<Text style={styles.timer}>{this.state.temperature >= 100 ? 'boiling' : this.state.forecast === null ? 'no forecast yet' : 'boil in: ' + this.state.forecast + 's'}</Text>
+					<Text style={styles.timer}>{this.state.temperature >= BOIL_TEMPERATURE ? 'boiling' : this.state.forecast === null ? 'no forecast yet' : 'boil in: ' + this.state.forecast + 's'}</Text>
 				</View>
 
 				{/*<View>
@@ -328,7 +329,7 @@ class Bapometp extends Component {
 					let temperature = parseFloat(read.substring(read.indexOf(' ')));
 					let newMeasure = { time: time, temperature: temperature };
 					let measures = this.state.measures.concat([newMeasure]);
-					let forecast = this.forecast100(measures, time);
+					let forecast = this.forecast100(measures, time) || this.state.forecast;
 					this.setState({ asking: false, measures: measures, temperature: temperature, forecast: forecast });
 				})
 				.catch((err) => {
@@ -350,7 +351,7 @@ class Bapometp extends Component {
 			measures.map((m) => m.time),
 			measures.map((m) => m.temperature)
 		);
-		let boilIndex = temperatures.findIndex((t) => t >= 100);
+		let boilIndex = temperatures.findIndex((t) => t >= BOIL_TEMPERATURE);
 		if (boilIndex == -1) {
 			return null;
 		}
