@@ -107,8 +107,12 @@ class Bapometp extends Component {
 					<Text>{this.state.btEnabled ? (this.state.connected ? 'connected' : (this.state.connecting ? 'connecting' : 'not connected')) : 'BT disabled'}</Text>
 				</View>
 
-				<View style={{ backgroundColor: '#FC9' }}>
-					<Text>{this.state.temperature === null ? 'no temperature' : this.state.temperature + 'ºC'}</Text>
+				<View style={styles.currentTemperatureContainer}>
+					<Text style={styles.currentTemperature}>{this.state.temperature === null ? 'no temperature' : this.state.temperature + 'ºC'}</Text>
+				</View>
+
+				<View style={styles.timerContainer}>
+					<Text style={styles.timer}>Boil in: ???s</Text>
 				</View>
 
 				<View>
@@ -264,6 +268,22 @@ const styles = StyleSheet.create({
 		fontSize: 24,
 		marginVertical: 10,
 		alignSelf: 'center'
+	},
+	currentTemperatureContainer: {
+		marginTop: 30,
+		alignSelf: 'center'
+	},
+	currentTemperature: {
+		fontSize: 40,
+		justifyContent: 'center'
+	},
+	timerContainer: {
+		marginTop: 30,
+		alignSelf: 'center'
+	},
+	timer: {
+		fontSize: 40,
+		color: '#333'
 	}
 });
 
