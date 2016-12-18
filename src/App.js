@@ -22,6 +22,7 @@ class Bapometp extends Component {
 		this.bubbleMoveValue = new Animated.Value(0);
 		this.bubbleMoveValue2 = new Animated.Value(0);
 		this.bubbleMoveValue3 = new Animated.Value(0);
+		this.bubbleMoveValue4 = new Animated.Value(0);
 		this.state = {
 			btEnabled: false,
 			connected: false,
@@ -64,6 +65,7 @@ class Bapometp extends Component {
 			this.bubbleMoveValue.setValue(0);
 			this.bubbleMoveValue2.setValue(0);
 			this.bubbleMoveValue3.setValue(0);
+			this.bubbleMoveValue4.setValue(0);
 			const createAnimation = function (value, duration, easing, delay = 0) {
 				return Animated.timing(
 		      value,
@@ -77,10 +79,14 @@ class Bapometp extends Component {
 			}
 			Animated.parallel([
 		    createAnimation(this.bubbleMoveValue, 6000, Easing.ease),
-		    createAnimation(this.bubbleMoveValue2, 4000, Easing.ease, 4000),
-				createAnimation(this.bubbleMoveValue3, 6000, Easing.ease, 3000)
+		    createAnimation(this.bubbleMoveValue2, 4000, Easing.ease, this.randomNumber()),
+				createAnimation(this.bubbleMoveValue3, 6000, Easing.ease, this.randomNumber()),
+				createAnimation(this.bubbleMoveValue4, 3000, Easing.ease, this.randomNumber())
 		  ]).start(() => this.bubbleMove());
 	}
+	randomNumber () {
+    return Math.random() * 2000;
+  }
 
 	render () {
 		const move = this.bubbleMoveValue.interpolate({
@@ -92,6 +98,10 @@ class Bapometp extends Component {
 			outputRange: [-20, -1000]
 		});
 		const move3 = this.bubbleMoveValue3.interpolate({
+			inputRange: [0, 1],
+			outputRange: [-20, -1000]
+		});
+		const move4 = this.bubbleMoveValue4.interpolate({
 			inputRange: [0, 1],
 			outputRange: [-20, -1000]
 		});
@@ -114,8 +124,8 @@ class Bapometp extends Component {
 				<Animated.View
 						style={{
 							transform: [{translateY: move}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
-							height: 30,
-							width: 30,
+							height: 40,
+							width: 40,
 							borderRadius: 50,
 							backgroundColor: '#fff',
 						  opacity: 0.3,
@@ -129,8 +139,8 @@ class Bapometp extends Component {
 					<Animated.View
 							style={{
 								transform: [{translateY: move2}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
-								height: 30,
-								width: 30,
+								height: 20,
+								width: 20,
 								borderRadius: 50,
 								backgroundColor: '#fff',
 							  opacity: 0.3,
@@ -155,6 +165,21 @@ class Bapometp extends Component {
 								borderColor: '#fff',
 								marginLeft: 250
 							}} />
+
+				<Animated.View
+						style={{
+							transform: [{translateY: move4}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
+							height: 15,
+							width: 15,
+							borderRadius: 50,
+							backgroundColor: '#fff',
+							opacity: 0.3,
+							position: 'absolute',
+							bottom: -30,
+							borderWidth: 2,
+							borderColor: '#fff',
+							marginLeft: 200
+						}} />
 
 				<View style={{ backgroundColor: '#369' }}>
 					<Text>debug{this.state.debug}</Text>
