@@ -118,7 +118,7 @@ class Bapometp extends Component {
 				</View>
 
 				<View style={styles.timerContainer}>
-					<Text style={styles.timer}>Boil in: {this.state.forecast === null ? '??' : this.state.forecast}s</Text>
+					<Text style={styles.timer}>{this.state.temperature >= 100 ? 'boiling' : this.state.forecast === null ? 'no forecast yet' : 'boil in: ' + this.state.forecast + 's'}</Text>
 				</View>
 
 				{/*<View>
