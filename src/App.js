@@ -3,7 +3,9 @@ import {
 	StyleSheet,
 	Text,
 	TouchableOpacity,
-	View
+	View,
+	Animated,
+  Easing
 } from 'react-native'
 
 import BluetoothSerial from 'react-native-bluetooth-serial'
@@ -16,6 +18,8 @@ const REREAD_ANSWER_PERIOD = 100;
 class Bapometp extends Component {
 	constructor (props) {
 		super(props);
+		this.animatedValue = new Animated.Value(0);
+		this.bubbleMoveValue = new Animated.Value(0);
 		this.state = {
 			btEnabled: false,
 			connected: false,
@@ -32,10 +36,68 @@ class Bapometp extends Component {
 		this.checkBtEnabled();
 	}
 
+	componentDidMount () {
+		this.animate();
+		this.bubbleMove();
+	}
+	animate () {
+			this.animatedValue.setValue(0);
+			Animated.timing(
+				this.animatedValue,
+				{
+					toValue: 1,
+      		duration: 2000,
+      		easing: Easing.linear
+				}
+			).start(() => this.animate());
+	}
+	bubbleMove () {
+			this.bubbleMoveValue.setValue(0);
+			Animated.timing(
+				this.bubbleMoveValue,
+				{
+					toValue: 1,
+      		duration: 6000
+      	//	easing: Easing.linear
+				}
+			).start(() => this.bubbleMove());
+	}
+
 	render () {
+		const move = this.bubbleMoveValue.interpolate({
+			inputRange: [0, 1],
+			outputRange: [-20, -1000]
+		});
+		const scaleX = this.animatedValue.interpolate({
+			inputRange: [0, 0.2, 0.45, 0.7, 0.93, 1],
+			outputRange: [1, 1.3, 0.9, 1.05, 1, 1]
+		});
+		const scaleY = this.animatedValue.interpolate({
+			inputRange: [0, 0.2, 0.45, 0.7, 0.93, 1],
+			outputRange: [1, 0.7, 1.1, 0.95, 1, 1]
+		});
+		const translateX = this.animatedValue.interpolate({
+			inputRange: [0, 0.2, 0.4, 0.6, 0.8, 1],
+			outputRange: [0, -10, 10, -10, 10, 0]
+		});
 		return (
 			<View style={[styles.container, this.getBackgroundColor()]} >
 				<Text style={styles.heading}>BAPOMETP</Text>
+
+				<Animated.View
+						style={{
+							transform: [{translateY: move}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
+							height: 30,
+							width: 30,
+							borderRadius: 50,
+							backgroundColor: '#fff',
+						  opacity: 0.3,
+							position: 'absolute',
+							bottom: 0,
+							borderWidth: 2,
+							borderColor: '#fff',
+							marginLeft: 50
+						}} />
 
 				<View style={{ backgroundColor: '#369' }}>
 					<Text>debug{this.state.debug}</Text>
@@ -52,6 +114,8 @@ class Bapometp extends Component {
 				<View>
 					{this.state.measures.map((m) => <Text key={m.time}> {m.time} | {m.temperature} </Text>)}
 				</View>
+
+
 			</View>
 		)
 	}
