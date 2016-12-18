@@ -65,7 +65,6 @@ class Bapometp extends Component {
 				{
 					toValue: 1,
       		duration: 6000
-      	//	easing: Easing.linear
 				}
 			).start(() => this.bubbleMove());
 	}
@@ -119,11 +118,7 @@ class Bapometp extends Component {
 				</View>
 
 				<View style={styles.timerContainer}>
-					<Text style={styles.timer}>Boil in: ???s</Text>
-				</View>
-
-				<View style={{ backgroundColor: '#FED' }}>
-					<Text>{this.state.forecast === null ? 'no forecast' : this.state.forecast} sec</Text>
+					<Text style={styles.timer}>Boil in: {this.state.forecast === null ? '??' : this.state.forecast}s</Text>
 				</View>
 
 				{/*<View>
@@ -303,7 +298,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	currentTemperature: {
-		fontSize: 40,
+		fontSize: 44,
 		justifyContent: 'center'
 	},
 	timerContainer: {
@@ -311,7 +306,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	timer: {
-		fontSize: 40,
+		fontSize: 44,
 		color: '#333'
 	}
 });
