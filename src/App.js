@@ -20,14 +20,16 @@ class Bapometp extends Component {
 		super(props);
 		this.animatedValue = new Animated.Value(0);
 		this.bubbleMoveValue = new Animated.Value(0);
+		this.bubbleMoveValue2 = new Animated.Value(0);
+		this.bubbleMoveValue3 = new Animated.Value(0);
 		this.state = {
 			btEnabled: false,
 			connected: false,
 			connecting: false,
 			measures: [
-				// {time: 5513, temperature: 42.5},
-				// {time: 6813, temperature: 47.06},
-				// {time: 8112, temperature: 50.81}
+				//  {time: 5513, temperature: 42.5},
+				//  {time: 6813, temperature: 47.06},
+				//  {time: 8112, temperature: 50.81}
 			],
 			temperature: null,
 			forecast: null,
@@ -35,7 +37,7 @@ class Bapometp extends Component {
 			debug: ''
 		};
 		this.extrapolate = require('everpolate').linear;
-		// this.state.forecast = this.forecast100(this.state.measures, 8112);
+		//  this.state.forecast = this.forecast100(this.state.measures, 8112);
 	}
 
 	componentWillMount () {
@@ -60,17 +62,36 @@ class Bapometp extends Component {
 	}
 	bubbleMove () {
 			this.bubbleMoveValue.setValue(0);
-			Animated.timing(
-				this.bubbleMoveValue,
-				{
-					toValue: 1,
-      		duration: 6000
-				}
-			).start(() => this.bubbleMove());
+			this.bubbleMoveValue2.setValue(0);
+			this.bubbleMoveValue3.setValue(0);
+			const createAnimation = function (value, duration, easing, delay = 0) {
+				return Animated.timing(
+		      value,
+		      {
+		        toValue: 1,
+		        duration,
+		        easing,
+		        delay
+		      }
+		    )
+			}
+			Animated.parallel([
+		    createAnimation(this.bubbleMoveValue, 6000, Easing.ease),
+		    createAnimation(this.bubbleMoveValue2, 4000, Easing.ease, 4000),
+				createAnimation(this.bubbleMoveValue3, 6000, Easing.ease, 3000)
+		  ]).start(() => this.bubbleMove());
 	}
 
 	render () {
 		const move = this.bubbleMoveValue.interpolate({
+			inputRange: [0, 1],
+			outputRange: [-20, -1000]
+		});
+		const move2 = this.bubbleMoveValue2.interpolate({
+			inputRange: [0, 1],
+			outputRange: [-20, -1000]
+		});
+		const move3 = this.bubbleMoveValue3.interpolate({
 			inputRange: [0, 1],
 			outputRange: [-20, -1000]
 		});
@@ -99,11 +120,41 @@ class Bapometp extends Component {
 							backgroundColor: '#fff',
 						  opacity: 0.3,
 							position: 'absolute',
-							bottom: 0,
+							bottom: -60,
 							borderWidth: 2,
 							borderColor: '#fff',
 							marginLeft: 50
 						}} />
+
+					<Animated.View
+							style={{
+								transform: [{translateY: move2}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
+								height: 30,
+								width: 30,
+								borderRadius: 50,
+								backgroundColor: '#fff',
+							  opacity: 0.3,
+								position: 'absolute',
+								bottom: -60,
+								borderWidth: 2,
+								borderColor: '#fff',
+								marginLeft: 180
+							}} />
+
+					<Animated.View
+							style={{
+								transform: [{translateY: move3}, {scaleX: scaleX}, {scaleY: scaleY}, {translateX: translateX}],
+								height: 30,
+								width: 30,
+								borderRadius: 50,
+								backgroundColor: '#fff',
+							  opacity: 0.3,
+								position: 'absolute',
+								bottom: -30,
+								borderWidth: 2,
+								borderColor: '#fff',
+								marginLeft: 250
+							}} />
 
 				<View style={{ backgroundColor: '#369' }}>
 					<Text>debug{this.state.debug}</Text>
